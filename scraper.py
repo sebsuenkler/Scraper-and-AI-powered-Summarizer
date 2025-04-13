@@ -4,9 +4,13 @@ import argparse
 import urllib.parse  # Standard library for URL handling
 from seleniumbase import Driver
 import time
+import logging
 
 from summarizer import summarize_text
 from bs4 import BeautifulSoup
+
+# Configure module logger
+logger = logging.getLogger(__name__)
 
 def strip_html_tags(html_string):
     """
@@ -24,7 +28,7 @@ def strip_html_tags(html_string):
 class ScraperSummarizer:
     def __init__(self):
         self.ext_path = self.read_extension_path()
-        self.driver = self.init_driver()
+        self.driver = None  # Initialize driver only when needed
         self.url = None
 
     def set_url(self, url):
@@ -74,44 +78,66 @@ class ScraperSummarizer:
         Returns:
             The configured WebDriver instance
         """
-        driver_options = {
-            "browser": "chrome",             # Use Chrome browser
-            "wire": True,                    # Enable wire mode for better request handling
-            "uc": True,                      # Undetectable Chrome mode
-            "headless2": True,               # Improved headless mode
-            "incognito": False,              # Not using incognito
-            "agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "do_not_track": True,            # Add DNT header
-            "undetectable": True,            # Additional undetectable settings
-            "no_sandbox": True               # No sandbox for better compatibility
-        }
-
-        # Only add extension if it exists
-        if os.path.exists(self.ext_path):
-            driver_options["extension_dir"] = self.ext_path
-
-        page_load_timeout = 60
-        self.driver = Driver(**driver_options)
-
-        self.driver.set_page_load_timeout(page_load_timeout)
-        self.driver.set_script_timeout(min(10, page_load_timeout * 0.5))
-        self.driver.implicitly_wait(60)
-
+        if self.driver is not None:
+            logger.warning("Driver already initialized, returning existing instance")
+            return self.driver
+            
         try:
-            self.driver.execute_cdp_cmd("Network.enable", {})
-        except Exception as e:
-            print(f"CDP Network enable failed: {e}")
+            logger.debug("Initializing Chrome driver")
+            driver_options = {
+                "browser": "chrome",             # Use Chrome browser
+                "wire": True,                    # Enable wire mode for better request handling
+                "uc": True,                      # Undetectable Chrome mode
+                "headless2": True,               # Improved headless mode
+                "incognito": False,              # Not using incognito
+                "agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                "do_not_track": True,            # Add DNT header
+                "undetectable": True,            # Additional undetectable settings
+                "no_sandbox": True               # No sandbox for better compatibility
+            }
 
-        return self.driver
+            # Only add extension if it exists
+            if os.path.exists(self.ext_path):
+                driver_options["extension_dir"] = self.ext_path
+
+            page_load_timeout = 60
+            self.driver = Driver(**driver_options)
+
+            self.driver.set_page_load_timeout(page_load_timeout)
+            self.driver.set_script_timeout(min(10, page_load_timeout * 0.5))
+            self.driver.implicitly_wait(60)
+
+            try:
+                self.driver.execute_cdp_cmd("Network.enable", {})
+            except Exception as e:
+                logger.warning(f"CDP Network enable failed: {e}")
+
+            return self.driver
+        except Exception as e:
+            logger.error(f"Failed to initialize driver: {e}", exc_info=True)
+            raise
 
     def close(self):
-        self.driver.close()
+        """
+        Safely closes the browser and cleans up resources.
+        """
+        if self.driver is not None:
+            try:
+                logger.debug("Closing browser driver")
+                self.driver.quit()
+            except Exception as e:
+                logger.warning(f"Error closing driver: {e}")
+            finally:
+                self.driver = None
+                logger.debug("Driver set to None")
 
     def read_extension_path(self):
         # Define the path for configurations and extensions
         currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
         ext_path = os.path.join(currentdir, "extension")
         return ext_path
+
+class ScraperSummarizer(ScraperSummarizer):
     
     def summarize(self):
         """
@@ -129,7 +155,10 @@ class ScraperSummarizer:
         """
         if self.url:
             try:
-                print(f"Accessing URL: {self.url}")
+                logger.info(f"Accessing URL: {self.url}")
+                # Initialize the driver
+                self.init_driver()
+                
                 # Load the page
                 self.driver.get(self.url)
                 # Wait for initial content to load
@@ -142,21 +171,24 @@ class ScraperSummarizer:
                 # Remove HTML and extract text
                 stripped_text = strip_html_tags(self.driver.page_source)
                 
-                # Limit to first 20,000 words to avoid token limits
-                number_of_words = 20000
+                # Limit to first 10,000 words to avoid token limits
+                number_of_words = 10000
                 words = stripped_text.split()
                 reduced_content = ' '.join(words[:number_of_words])
                 
                 # Remove quotes that might interfere with the API prompt
                 reduced_content = reduced_content.replace("'", "").replace('"', '')
          
-                print("Generating summary...")
+                logger.info("Generating summary...")
                 # Call the AI summarizer
                 self.summary = summarize_text(reduced_content)
                 return self.summary
             except Exception as e:
-                print(f"Error during scraping or summarizing: {e}")
+                logger.error(f"Error during scraping or summarizing: {e}", exc_info=True)
                 return f"Error: {str(e)}"
+            finally:
+                # Always close the driver to properly clean up resources
+                self.close()
         else:
             return "Error: No URL provided"
 

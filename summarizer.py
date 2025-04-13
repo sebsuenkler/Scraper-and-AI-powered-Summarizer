@@ -24,7 +24,7 @@ def summarize_text(text):
         Initializes and returns the OpenAI client for Nebius API.
         
         This function:
-        1. Loads environment variables from .env file (change the API Key to your own or replace it by other APIs like ChatGPT)
+        1. Loads environment variables from .env file
         2. Sets up the API client with the appropriate base URL and API key
         
         Returns:
@@ -43,7 +43,7 @@ def summarize_text(text):
         
         This function:
         1. Initializes the API client
-        2. Sends the prompt to the Mixtral model (change the model to your desired model)
+        2. Sends the prompt to the Mixtral model
         3. Configures response parameters (temperature, tokens, etc.)
         4. Extracts and returns the content from the response
         
@@ -95,7 +95,7 @@ def summarize_text(text):
             A string containing the detected language
         """
         prompt = (
-            f"Recognize the main language of this text. Use a frequency analysis of the words. Always choose the language with the most words, regardless of whether there are other languages in the text."
+            f"Recognize the main language of this text disregard the content, topic, or subject matter completely. Use a frequency analysis of the words. Always choose the language with the most words, regardless of whether there are other languages in the text. Just count the words and then set the language to the one with the most words. Do not make assumptions based on mentioned people, places, or organizations.\n\n"
             f"At the end, **only enter the language as a single word** in the following form. No explanation, no introduction, no justification - just the keyword:\n\n"
             f"Language: <language>\n\n"
             f"Text:\n{text}\n\n"
