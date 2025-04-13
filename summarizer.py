@@ -56,7 +56,7 @@ def summarize_text(text):
         """
         client = init_client()
         response = client.chat.completions.create(
-            model="mistralai/Mixtral-8x7B-Instruct-v0.1",  # Using Mixtral 8x7B model
+            model="mistralai/Mixtral-8x7B-Instruct-v0.1-fast",  # Using Mixtral 8x7B model
             max_tokens=tokens,                           # Maximum length of response
             temperature=0.2,                             # Lower creativity (more focused)
             top_p=0.85,                                  # Restricted word variety
@@ -95,9 +95,9 @@ def summarize_text(text):
             A string containing the detected language
         """
         prompt = (
-            f"Recognize the main language of this text disregard the content, topic, or subject matter completely. Use a frequency analysis of the words. Always choose the language with the most words, regardless of whether there are other languages in the text. Just count the words and then set the language to the one with the most words. Do not make assumptions based on mentioned people, places, or organizations.\n\n"
+            f"Recognize the main language of this text disregard the content, topic, or subject matter completely. Use a frequency analysis of the words. Always choose the language with the most words, regardless of whether there are other languages in the text. Do not make assumptions based on mentioned people, places, or organizations.\n\n"
             f"At the end, **only enter the language as a single word** in the following form. No explanation, no introduction, no justification - just the keyword:\n\n"
-            f"Language: <language>\n\n"
+            f"Language: <language>"
             f"Text:\n{text}\n\n"
         )     
         language = get_response(prompt, 100).strip()
@@ -119,7 +119,7 @@ def summarize_text(text):
             A string containing the formatted summary
         """
         prompt = (
-            f"Read the following text and summarize its content briefly and precisely in **{language}** as continuous text. " \
+            f"Read the following text and summarize its content briefly and precisely in **{language}** as continuous text. Try to limit the summary to a maximum of 300 words if appropriate."
             f"Return **only** the summary in {language} - without introduction, without original text, without explanation, without a translation:\n\n" \
             f"{text}\n\n" \
             f"Divide the summary into paragraphs and separate each paragraph with a blank line (\n\n) to improve readability."
