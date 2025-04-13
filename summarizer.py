@@ -124,7 +124,7 @@ def summarize_text(text):
             f"{text}\n\n" \
             f"Divide the summary into paragraphs and separate each paragraph with a blank line (\n\n) to improve readability."
         )
-        summary = get_response(prompt, 1024).strip()  # Allow up to 1024 tokens for detailed summary
+        summary = get_response(prompt, 1500).strip()  # Allow up to 1500 tokens for detailed summary
         return summary
 
     
