@@ -6,7 +6,11 @@ A tool to scrape web pages and generate summaries using AI.
 
 - Scrapes web content using Selenium with undetectable browser configuration
 - Handles special characters in URLs automatically
-- Detects language and summarize the content using a Mixtral AI model via the Nebius API (modify the .env file and the get_response() method in summarizer.py to suit your needs, e.g. using a different model, API or ChatGPT)
+- Detects language and summarize the content using [phi-4 by Microsoft](https://huggingface.co/microsoft/phi-4) via the Nebius API (modify the .env file and the get_response() method in summarizer.py to suit your needs, e.g. using a different model, API or ChatGPT)
+
+## Live-Demo
+
+[https://suenkler-ai.de/summarizer](https://suenkler-ai.de/summarizer)
 
 ## Installation
 
@@ -59,6 +63,6 @@ scraper --url "https://example.com/search?q=special+query&lang=en"
 ## Notes
 
 - Make sure ChromeDriver is properly installed and compatible with your Chrome version
-- The tool requires an internet connection to access the Nebius API
+- The tool requires an internet connection to access the [Nebius API] (https://studio.nebius.com/) 
 - The `.env` file with your API key must be in the directory where you run the command
 - The extension folder contains the downloaded browser extension [https://github.com/OhMyGuus/I-Still-Dont-Care-About-Cookies](https://github.com/OhMyGuus/I-Still-Dont-Care-About-Cookies)
