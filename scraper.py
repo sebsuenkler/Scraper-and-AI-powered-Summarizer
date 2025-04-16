@@ -171,7 +171,7 @@ class ScraperSummarizer(ScraperSummarizer):
                 # Remove HTML and extract text
                 stripped_text = strip_html_tags(self.driver.page_source)
                 
-                # Limit to first 10,000 words to avoid token limits
+                # Limit to first 5,000 words to avoid token limits
                 number_of_words = 5000
                 words = stripped_text.split()
                 reduced_content = ' '.join(words[:number_of_words])
