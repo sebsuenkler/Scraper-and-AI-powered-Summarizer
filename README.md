@@ -63,7 +63,8 @@ scraper --url "https://example.com/search?q=special+query&lang=en"
 ## Notes
 
 - Make sure ChromeDriver is properly installed and compatible with your Chrome version
-- The tool requires an internet connection to access the [Nebius API](https://studio.nebius.com/) 
+- The tool requires an internet connection to access the [Nebius API](https://studio.nebius.com/)
+- It should be possible to simply replace the Nebius API with another service that is compatible with OpenAI.
 - The `.env` file with your API key must be in the directory where you run the command
 - The extension folder contains the downloaded browser extension [https://github.com/OhMyGuus/I-Still-Dont-Care-About-Cookies](https://github.com/OhMyGuus/I-Still-Dont-Care-About-Cookies)
 - Result quality varies based on the specific LLM model and the prompt.
